@@ -1,3 +1,11 @@
 <resources>
-    <string name="app_name">Labs</string>
+    <string name="app_name">My Weather App</string>
+    <string name="myLocation">St. Paul, MN</string>
+    <string name="currentTempData">72º</string>
+    <string name="feelsLike">Feels like 78º</string>
+    <string name="dailyLow">Low 65º</string>
+    <string name="dailyHigh">High 80º</string>
+    <string name="humidity">Humidity 100%</string>
+    <string name="stringPressure">Pressure 1024 hPa</string>
+    <string name="imgDescription">Sunny</string>
 </resources>
