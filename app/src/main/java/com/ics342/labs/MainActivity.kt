@@ -1,32 +1,52 @@
 package com.ics342.labs
 
 import android.os.Bundle
+import android.provider.ContactsContract.Data
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.NavType
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.ics342.labs.data.DataItem
 import com.ics342.labs.ui.theme.LabsTheme
+import java.util.Random
 
 
 private val dataItems = listOf(
@@ -62,30 +82,16 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    Greeting("Android")
+                    NavigationView()
                 }
             }
         }
     }
 }
 
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
 
 @Composable
 fun DataItemView(dataItem: DataItem) {
-    var showDialog by remember {
-        mutableStateOf(false)
-    }
-
-    //Creates a space for "Hello Android!".
-    Spacer(modifier = Modifier.size(20.dp))
-
     Row {
         //Gets the dataItem ID and converts it to a string
         Text(text = dataItem.id.toString())
@@ -104,25 +110,73 @@ fun DataItemView(dataItem: DataItem) {
                 text = dataItem.description,
                 style = MaterialTheme.typography.bodySmall,
                 fontSize = 3.sp,
-                )
+            )
         }
-
-    }
-    if (showDialog){
-        AlertDialog(
-            onDismissRequest = { showDialog = false},
-            title = { Text(text = dataItem.name)},
-            text = { Text(text = dataItem.description)},
-            confirmButton = { TextButton(onClick = { showDialog = false }) {
-                Text(text = "Okay")
-            }},
-        )
     }
 }
 
+
+//Navigation function: home screen and detail screen
+@Composable
+fun NavigationView() {
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "home") {
+        composable("home") {
+            HomeScreen(navController)
+        }
+        composable("Detail") {
+            DetailScreen(
+                onHome = { navController.popBackStack() }
+            )
+        }
+    }
+}
+
+
+//Creates a list of all the data items making them clickable
+//when clicked, moves to a new screen
+@Composable
+fun HomeScreen(navController: NavHostController) {
+    Column {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            items(dataItems) { DataItem ->
+                Button(
+                    onClick = { navController.navigate("Detail") },
+                    colors = ButtonDefaults.buttonColors(Color.Black.copy(alpha = 1F))
+                ) { DataItemView(DataItem) }
+            }
+        }
+    }
+}
+
+//This function displays the items ID, Name, and Description
+@Composable
+fun DetailScreen(onHome: () -> Unit) {
+    Column(
+        Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Top
+    ) {
+        Text("Detail Screen", fontSize = 40.sp, fontWeight = FontWeight.Bold)
+        Spacer(modifier = Modifier.height(20.dp))
+
+        Text(text = "Item ID: " + dataItems[0].id.toString())
+        Text(text = dataItems[0].name)
+
+        Spacer(modifier = Modifier.height(15.dp))
+        Text(text = dataItems[0].description, fontSize = 20.sp)
+
+        Button(onClick = onHome) { Text("Go back to Home Screen") }
+    }
+
+}
+
+//function to show the data items **keeping this function for reference**
 @Composable
 fun DataItemList(dataItems: List<DataItem>) {
-    /* Create the list here. This function will call DataItemView() */
 
     //Creates a function for a column for dataItems.
     LazyColumn {
@@ -137,7 +191,7 @@ fun DataItemList(dataItems: List<DataItem>) {
 @Composable
 fun GreetingPreview() {
     LabsTheme {
-        Greeting("Android")
-        DataItemList(dataItems = dataItems)
+        NavigationView()
     }
 }
+
